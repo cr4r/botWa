@@ -1,1 +1,0 @@
-tempat narok test

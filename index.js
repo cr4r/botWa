@@ -11,16 +11,12 @@ const urlencode = require("urlencode");
 const yts = require("./lib/cmd.js");
 const exec = require('child_process').exec;
 var urlll = require('url');
-
-
-var recentcmd = new Set();	
-var fspamm=new Set();	
-var sban= new Set();	
-var stickerspam=new Set();	
-var stp=new Set();	
-var loaded=0;	
-var counter=0;
-
+const brainly = require('brainly-scraper');
+const cron = require('node-cron');
+const Virdina = require('./lib/Virdina');
+const colors = require('colors');
+const { pow,round, log , simplify, parse, derivative } = require('./lib/math.min.js')
+ 
 // file is included here
 let sessionCfg;
 
@@ -206,13 +202,13 @@ Member : ${chat.participants.length}`)
       }
     }
 
-    else if (msg.body == "p"||msg.body == "hai"||msg.body == "hi"||msg.body == "hello"||msg.body == "hay"||msg.body == "kak"||msg.body == "ini bot"||msg.body == "ini bot?") {
+    else if (msg.body == "p"||msg.body == "Hai"||msg.body == "bot"||msg.body == "Bot?"||msg.body == "bot?"||msg.body == "Bot"||msg.body == "hai"||msg.body == "hi"||msg.body == "hello"||msg.body == "hay"||msg.body == "kak"||msg.body == "ini bot"||msg.body == "ini bot?") {
       var sapa = ['hai','hello','hai kak','siapa?','ada apa','ya?','ada apa ya?','y','ya','ada apa kak','ya ada apa','ada yang bisa saya bantu?','hmm','oh yes','oh no']
       var pp = sapa[Math.floor(Math.random() * sapa.length)];
       msg.reply(pp)
     }
 
-    else if (msg.body == "assalamualaikum") {
+    else if (msg.body == "assalamualaikum"||msg.body == "Assalamualaikum"||msg.body == "assalamu'alaikum") {
       msg.reply(`Walaikumsalam`)
     }
 
@@ -341,15 +337,16 @@ Member : ${chat.participants.length}`)
     } 
 
 
-  else if (msg.body == "!menu") {
+  else if (msg.body == "menu") {
  client.sendMessage(msg.from,  `
 ╭───「 *List Menu*
 ├≽️ tool web
 ├≽️ info grub
+├≽️ kalkulator
 ├≽️ Pesan = kirim pesan lewat bot
-├≽️ !menu1 = Fun Menu 🌞
-├≽️ !menu2 = Downloader Menu🎞
-├≽️ !menu3 = Horoscope Menu 🎇
+├≽️ menu1 = Fun Menu 🌞
+├≽️ menu2 = Downloader Menu🎞
+├≽️ menu3 = Horoscope Menu 🎇
 ╰─────────
 `);
 }
@@ -364,7 +361,7 @@ else if (msg.body == "tool web") {
  
 
 // Admin Menu 
-else if (msg.body == "!admin") {
+else if (msg.body == "admin") {
  client.sendMessage(msg.from,  `
  ╭───「 Owner Only 」
  ├≽️ subject <optional> = Untuk mengganti nama group!
@@ -387,41 +384,41 @@ else if (msg.body == "pesan"||msg.body == "Pesan") {
 ├≽️ *kirim nomor/tag Pesan kamu* : Mengirim pesan ke tujuan
 ├≽️ *Contoh :* kirim 62822xxxxxx Hay kenalan dong
 ├≽️ *Contoh :* kirim @tagOrangdiGrub Hay kenalan dong
-├≽️ ────────────────────────────
+├≽️ 
 ├≽️ *spam limit nomor/tag Pesan kamu* : Spam pesan ke tujuan
 ├≽️ *Contoh :* spam 10 62822xxxxx hay beb
 ├≽️ *Contoh :* spam 10 @TagOrangDiGrub hay beb
 ├≽️ *!translate katamu kodeNegara: mentranslate sebuah kata
 ├≽️ *join linkGrub* : Masuk ke sebuah grub whatsapp
-╰──────────────────────────────
+╰────────────────────────────
  `);
   }
 
  // Menu 1
- else if (msg.body == "!menu1") {
+ else if (msg.body == "menu1") {
  client.sendMessage(msg.from,  `
  
  ╭───「 *Welcome To Fun Menu* 」
  ├≽️ *random anime* = untuk melihat gambar anime secara random
- ├≽️ ───────────────────
+ ├≽️ 
  ├≽️ *quotes* : Melihat quotes dari tokoh terkenal
- ├≽️ ───────────────────
+ ├≽️ 
  ├≽️ *kata cinta* : Kata kata cinta
- ├≽️ ───────────────────
+ ├≽️ 
  ├≽️ *!play nama lagu*
  ├≽️ contoh: *!play whatever it takes*
- ├≽️ ───────────────────
+ ├≽️ 
  ├≽️ *tts teks* : mengubah teks menjadi suara
- ├≽️ ───────────────────
+ ├≽️ 
  ├≽️ *!wait* : Menampilkan informasi anime dengan mengirim gambar dengan caption !wait
- ├≽️ ───────────────────
+ ├≽️ 
  ├≽️ *!ptl1* : Menampilkan gambar gambar cewek cantik 🤩
- ├≽️ ───────────────────
+ ├≽️ 
  ├≽️ *!ptl2* : Menampilkan gambar gambar cowok ganteng 😎
- ├≽️ ───────────────────
+ ├≽️ 
  ├≽️ *!chord nama lagu* : Menampilkan Chord Gitar
  ├≽️ 
- ├≽️ *!carifoto kata kunci* : Cari gambar berdasarkat kata
+ ├≽️ *cari foto kata kunci* : Cari gambar berdasarkat kata
  ├≽️ contoh ( _*!sesrchimage kata bijak*_ )
  ╰─────────────────────`);
  }
@@ -430,74 +427,111 @@ else if (msg.body == "!menu2") {
  
  ╭───「 *Welcome To Downloader Menu* 」
  ├≽️ *!ytmp3 url* : Mendownload mp3 dari youtube
- ├≽️ contoh : !ytmp3 https://youtu.be/xUVz4nRmxn4
- ├≽️ ───────────────────────────
+ ├≽️ contoh : !ytmp3 https://youtu.be/xxxxxx
+ ├≽️ 
  ├≽️ *!fb url* : Mendownload video dari facebook
  ├≽️ contoh : !fb url
- ├≽️ ───────────────────────────
+ ├≽️ 
  ├≽️ *!ig url* : Mendownload media foto/video dari instagram
  ├≽️ contoh : !ig url
- ├≽️ ───────────────────────────
+ ├≽️ 
  ├≽️ *!pin url* : Mendownload video dari pinterest
  ├≽️ contoh : !pin url
- ╰──────────────────────────────`);
+ ╰───`);
 }
 else if (msg.body == "!menu3") {
   client.sendMessage (msg.from, `
  ╭───「 Menu Kegabutan 」
- ├≽️ *!nama* : Melihat arti dari nama kamu
+ ├≽️ *!nama namaKamu* : Melihat arti dari nama kamu
  ├≽️  contoh : !nama Bondan
  ├≽️ 
- ├≽️ *!pasangan* : Check kecocokan jodoh
+ ├≽️ *!pasangan nama&pasangan* : Check kecocokan jodoh
  ├≽️  contoh : !pasangan Dimas & Dinda
  ╰───────────────────────────`);
 }	
 
-  else if (msg.type=='sticker'){	
-    if(!(msg.fromMe)){ 	
-      const ur=msg.from;	
-      if(msg.author!="undefined"){	
-      const ur=msg.author;	
-      }	
-      let chat = await msg.getChat();	
-      let info = client.info;	
-      let aq = chat.participants.filter(x => x.id.user ==  info.me.user);	
-      var contact = await msg.getContact();	
-      if(chat.isGroup){	
-        if(aq[0].isAdmin){	
-          if(stickerspam.has(ur) && !(stp.has(ur))){	
-            stp.add(ur);	
-            msg.reply('You are spamming stickers! :]');	
+else if (msg.body == "kalkulator"|msg.body == "Kalkulator") {
+  client.sendMessage (msg.from, `
+ ╭───「 Menu Kalkulator 」
+ ├≽️ *hitung* : Mengihtung, konversi, determinan
+ ├≽️  contoh : *hitung (1*2)-(2+4)*
+ ├≽️  contoh : *hitung 9/3+2i*
+ ├≽️  contoh : *hitung 12.7 cm to inch
+ ├≽️  contoh : *hitung det([-1, 2; 3, 1])*
+ ├≽️  
+ ├≽️ *log* : Menghitung metode Log
+ ├≽️  contoh : *log 10000 10*
+ ├≽️  contoh : *log 3*
+ ├≽️  
+ ├≽️ *turunan* : Menghitung turunan
+ ├≽️  Contoh : *turunan x^2 + x, x*
+ ├≽️ 
+ ├≽️ *round* : Pembulatan angka
+ ├≽️  Contoh : round hasil, jumlah bulat
+ ├≽️  Contoh : round 2.3922, 3
+ ├≽️  
+ ├≽️ *pow* : Nilai yang dipangkatkan
+ ├≽️  Contoh : *pow 3,2*
+ ├≽️  Contoh : *pow [[-1, 2],[3, 1]],2*
+ ╰────────────────────────`);
+}	
+else if (msg.body.startsWith('pow ')||msg.body.startsWith('Pow ')) {
+  var res = msg.body.slice(4)
+  console.log(typeof pow(3,2))
 
-            if(contact.number == chat.owner.user){	
-                msg.reply("Owner cannot be removed!");	
-            }else{	
-                setTimeout(()=>{	
-                chat.removeParticipants([contact.id._serialized]);},1000);}	
-          }
-        }
-      }
-      stickerspam.add(ur);	
-      setTimeout(() =>{	
-        stickerspam.delete(ur);	
-        stp.delete(ur);	
-      },400);	
-    }
-    else{
-      msg.reply('gtw apa ini')
-    }
+  msg.reply(`*pangkat dari ${res}* = `+pow(Number(res)))
+}
+
+
+else if (msg.body.startsWith('round ')||msg.body.startsWith('Round ')) {
+  try{
+    var res = msg.body.slice(6).split(',')[0]
+    var res1 = parseInt(msg.body.slice(6).split(',')[1])
+    msg.reply(`*Pembulatan dari ${res}* = `+round(res,res1).toString())
   }
+  catch(err){
+    msg.reply(`${res} => Salah\nContoh Penggunaan:\nround 3.4956,2\nround 34.987,0\n,0-15 untuk menampilkan angka dibelakang koma\n\n${err}`)
+  }
+}
 
+else if (msg.body.startsWith('turunan ')||msg.body.startsWith('Turunan ')) {
+  try{
+    var res = msg.body.slice(8).split(',')[0]
+    var res1 = msg.body.slice(8).split(',')[1]
+    console.log(res+' , '+res1)
+    msg.reply(`*Turunan dari ${res},${res1}* = `+derivative(res,res1).toString())
+  }
+  catch(err){
+    msg.reply(`${res},${res1} => Salah\nContoh Penggunaan:turunan sin(2x),x\nturunan n^2 + n,n\nx = menjadi patokan\n${err}`)
+  }
+}
 
-else if (msg.body.startsWith("translate ")) {
-  const translatte = require('translatte');
-  var codelang = msg.body.split("[")[1].split("]")[0];
-  var text = msg.body.split(" ")[1];
-  translatte(text, {to: codelang}).then(res => {
-      msg.reply(res.text);
-    }).catch(err => {
-        msg.reply(err);
-  });
+else if (msg.body.startsWith('Hitung ')||msg.body.startsWith('hitung ')) {
+  var res = msg.body.slice(7)
+  try{
+    msg.reply(`*Kalkulator*\n${res} = ${simplify(res).toString()}`)
+  }
+  catch(err){
+    msg.reply(`anda salah masukkan symbol\n* : perkalian\n/ : pembagian+ : pertambahan\n- : pengurangan\n
+Contoh Penggunaan:
+1.2*(2 + 4.5)  //7.8
+9/3+2i  //3+2i
+det([-1, 2; 3, 1])  //-7
+12.7 cm to inch  //5
+
+${err}`)
+  }
+}
+
+else if (msg.body.startsWith('log ')||msg.body.startsWith('Log ')) {
+  var res = msg.body.slice(4)
+  console.log(res)
+  try{
+    msg.reply(`*Kalkulator*\nlog(${res}) = ${log(parseInt(res))}`)
+  }
+  catch(err){
+    msg.reply(`anda salah masukkan symbol\ncontoh : *log 10000 10*\ncontoh : *log 3*\n${err}`)
+  }
 }
 
 else if (msg.body.startsWith('join ')) {
@@ -1235,14 +1269,11 @@ Hai Kak 😊` });
 	
 	// Search Image
 	
-else if (msg.body.startsWith("carifoto ")) {
-
-var nama = msg.body.split("!carifoto ")[1];
+else if (msg.body.startsWith("cari foto ")) {
+var nama = msg.body.split("cari foto ")[1];
 var req = urlencode(nama.replace(/ /g,"+"));
     const imageToBase64 = require('image-to-base64');
-
     var url = "http://api.fdci.se/rep.php?gambar=" + req;
-    
     request.get({
       headers: {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0'},
       url:     url,
@@ -1384,8 +1415,7 @@ request.get({
     var x = f.replace(/<br\s*[\/]?>/gi, "\n");
     var h  = x.replace(/<[^>]*>?/gm, '');
 console.log(""+ h);
-msg.reply(
-            `
+msg.reply(`Ingat jangan percaya & anggap hanya lelucon
       *Arti Dari Namamu*
 
   ----------------------------------
@@ -1418,8 +1448,7 @@ var y = $.html().split('<b>KECOCOKAN JODOH BERDASARKAN NAMA PASANGAN</b><br><br>
     var h  = x.replace(/<[^>]*>?/gm, '');
     var d = h.replace("&amp;", '&')
 console.log(""+ d);
-msg.reply(` 
-
+msg.reply(` Ingat jangan percaya & anggap hanya lelucon
 -----------------------------------
 
  *Cek Kecocokan Jodoh Berdasarkan Nama ~*
